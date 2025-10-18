@@ -8,13 +8,12 @@ A comprehensive real-time trading dashboard built with Next.js, TypeScript, Clic
 
 - Live price updates with WebSocket connections
 - Real-time volume, bid/ask spreads, and 24h changes
-- Multi-exchange support (Binance, Coinbase, Kraken, Bitfinex)
 - Responsive price tables with pagination
 
 ### Trade Execution Interface
 
 - Swift buy/sell order execution
-- Multiple order types: Market, Limit, Stop
+- Order types: Market
 - Real-time order book visualization
 - Immediate order status feedback
 
@@ -22,7 +21,7 @@ A comprehensive real-time trading dashboard built with Next.js, TypeScript, Clic
 
 - Real-time system metrics (latency, throughput, error rates)
 - Component-wise performance tracking
-- Critical alert mechanisms
+- Alert mechanisms
 - Interactive charts and visualizations
 
 ### Historical Data Access
@@ -35,7 +34,6 @@ A comprehensive real-time trading dashboard built with Next.js, TypeScript, Clic
 ### Responsive Design
 
 - Mobile-first responsive design
-- Dark/light theme support
 - Optimal UX across all devices
 - Modern, professional interface
 
@@ -115,33 +113,49 @@ A comprehensive real-time trading dashboard built with Next.js, TypeScript, Clic
    ```
 
 6. **Access the application**
+
    - Main Dashboard: http://localhost:3000
    - WebSocket Server: ws://localhost:3001
+
+7. **Update user role from user to admin**
+   - ```docker exec -it clickhouse clickhouse-client -u default --password 123456 -q "
+     ALTER TABLE trading_db.users
+     UPDATE user_role = 'admin'
+     WHERE email = 'user@email.com';
+     "
+     ```
 
 ## Project Structure
 
 ```
 trading_dash/
-├── scripts/                   # Setup scripts
-│   └── init-db.js             # Database initialization
+├── scripts/                           
+│   └── init-db.js                     
 ├── src/
-│   ├── app/                   # Next.js App Router
-│   │   ├── api/               # API routes
-│   │   │   ├── auth/          # 
-│   │   │         ├── logout/  # Logout endpoint
-│   │   |         └── me/      #  
-│   │   │   ├── metrics/       # System metrics endpoints
-│   │   │   ├── orderbook/     # 
-│   │   │   ├── orders/        # Order management endpoints
-│   │   │   ├── prices/        # Market data endpoints
-│   │   │   ├── trades/        # Trade history endpoints
-│   │   │   └── users/         # Users endpoints
-│   │   ├── home/              # API routes
-|   |   |     └── page.tsx     # 
-│   │   ├── globals.css        # Global styles
-│   │   ├── layout.tsx         # Root layout
-│   │   └── page.tsx           # Main dashboard page
-│   ├── components/            # React components
+│   ├── app/                           
+│   │   ├── admin/                     
+│   │   │   ├── settings/              
+│   │   │         ├── page.tsx/        
+│   │   ├── api/                        
+│   │   │   ├── admin/                 
+│   │   │         ├── users/           
+│   │   │   ├── auth/                  
+│   │   │         ├── logout/           
+│   │   |         └── me/              
+│   │   │   ├── metrics/                
+│   │   │   ├── orderbook/             
+│   │   │   ├── orders/                 
+│   │   │   ├── prices/                 
+│   │   │   ├── trades/                 
+│   │   │   └── users/                  
+│   │   ├── home/                       
+|   |   |     └── page.tsx             
+│   │   ├── unauthorized/              
+|   |   |     └── page.tsx             
+│   │   ├── globals.css                 
+│   │   ├── layout.tsx                  
+│   │   └── page.tsx                    
+│   ├── components/                     
 │   │   ├── OrderBook.tsx
 │   │   ├── OrderHistory.tsx
 │   │   ├── PriceTable.tsx
@@ -150,137 +164,14 @@ trading_dash/
 │   │   ├── TradeHistory.tsx
 │   │   ├── TradingDashboard.tsx
 │   │   └── UserAuthForm.tsx
-│   └── hooks/                 # Custom React hooks
-│       └── useWebSocket.ts    # WebSocket integration
-|   |── lib/                       # Utility libraries
-│   |    ├── auth.ts                # 
-│   |    ├── clickhouse.ts          # Database client
-│   |    ├── config.ts              # Configuration
-│   |    ├── utils.ts               # 
-│   |    ├── websocket-server.ts    # WebSocket server
-│   |    └── WebSocketProvider.tsx  # Configuration
-└── server.js                  # Custom server setup
+│   └── hooks/                          
+│       └── useWebSocket.ts             
+|   |── lib/                            
+│   |    ├── auth.ts                   
+│   |    ├── clickhouse.ts              
+│   |    ├── config.ts                  
+│   |    ├── utils.ts                  
+│   |    ├── websocket-server.ts        
+│   |    └── WebSocketProvider.tsx      
+└── server.js                           
 ```
-
-## API Endpoints
-
-### Market Data
-
-- `GET /api/prices` - Get paginated price data
-- `GET /api/prices?symbol=BTC/USD` - Filter by symbol
-- `GET /api/prices?exchange=binance` - Filter by exchange
-
-### Trading
-
-- `GET /api/trades` - Get trade history
-- `POST /api/trades` - Execute a trade
-- `GET /api/orders` - Get order history
-- `POST /api/orders` - Place an order
-
-### System Metrics
-
-- `GET /api/metrics` - Get system metrics
-- `POST /api/metrics` - Get aggregated metrics
-
-## WebSocket Events
-
-### Client → Server
-
-- `subscribe_symbols` - Subscribe to price updates
-- `subscribe_metrics` - Subscribe to system metrics
-- `execute_trade` - Execute a trade
-- `place_order` - Place an order
-
-### Server → Client
-
-- `price_update` - Real-time price updates
-- `metrics_update` - System metrics updates
-- `trade_executed` - Trade execution notifications
-- `order_placed` - Order placement notifications
-
-## Configuration
-
-Create a `.env.local` file in the root directory:
-
-```env
-# ClickHouse Configuration
-CLICKHOUSE_HOST=localhost
-CLICKHOUSE_PORT=8123
-CLICKHOUSE_USERNAME=default
-CLICKHOUSE_PASSWORD=
-CLICKHOUSE_DATABASE=trading_db
-
-# WebSocket Configuration
-WEBSOCKET_PORT=3001
-
-# Trading Configuration
-DEFAULT_PAGE_SIZE=20
-MAX_PAGE_SIZE=100
-```
-
-## Development
-
-### Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run db:setup` - Initialize database
-
-### Key Features Implementation
-
-#### Real-Time Data Flow
-
-1. ClickHouse stores historical and real-time data
-2. WebSocket server pushes updates to connected clients
-3. React components subscribe to relevant data streams
-4. UI updates automatically with new data
-
-#### Performance Optimization
-
-- ClickHouse partitioning for fast queries
-- WebSocket connection pooling
-- React component memoization
-- Efficient pagination with database-level limits
-
-#### Security Considerations
-
-- Input validation on all API endpoints
-- Rate limiting for trade execution
-- WebSocket connection authentication
-- SQL injection prevention with parameterized queries
-
-## Deployment
-
-### Production Build
-
-```bash
-npm run build
-npm run start
-```
-
-### Docker Deployment
-
-```bash
-# Build Docker image
-docker build -t trading-dashboard .
-
-# Run with ClickHouse
-docker-compose up -d
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Support
-
-For support and questions, please open an issue in the repository.
