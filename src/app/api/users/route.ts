@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
       country: string | null;
       balance: number;
       status: string;
+      user_role: "user" | "admin";
     }>;
 
     if (!users.length) {
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
       sub: user.id,
       username: user.username,
       email: user.email,
+      role: user.user_role,
     });
 
     const res = NextResponse.json({
@@ -71,6 +73,7 @@ export async function GET(request: NextRequest) {
         country: user.country,
         balance: user.balance,
         status: user.status,
+        role: user.user_role,
       },
     });
 
@@ -158,3 +161,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

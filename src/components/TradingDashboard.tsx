@@ -7,6 +7,8 @@ import {
   Activity,
   AlertTriangle,
   DollarSign,
+  Crown,
+  Settings,
 } from "lucide-react";
 import { PriceTable } from "./PriceTable";
 import { TradeExecution } from "./TradeExecution";
@@ -33,9 +35,11 @@ export function TradingDashboard() {
     errorRate: 0,
   });
 
-  const [user, setUser] = useState<{ username: string; email: string } | null>(
-    null
-  );
+  const [user, setUser] = useState<{
+    username: string;
+    email: string;
+    role?: string;
+  } | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
   useEffect(() => {
@@ -44,13 +48,14 @@ export function TradingDashboard() {
         const res = await fetch("/api/auth/me");
         if (res.ok) {
           const data = await res.json();
+          console.log("Authenticated user:", data.user);
           setUser(data.user);
         } else {
-          window.location.href = "/login";
+          window.location.href = "/";
         }
       } catch (err) {
         console.error("User auth error:", err);
-        window.location.href = "/login";
+        window.location.href = "/";
       } finally {
         setLoadingUser(false);
       }
@@ -70,16 +75,32 @@ export function TradingDashboard() {
 
   const fetchDashboardStats = async () => {
     try {
-      setStats({
-        totalVolume: 1250000,
-        activeTrades: 42,
-        systemLatency: 0.8,
-        errorRate: 0.02,
-      });
+      const res = await fetch("/api/dashboard");
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setStats(data.stats);
+      }
     } catch (error) {
       console.error("Failed to fetch dashboard stats:", error);
     }
   };
+
+  useEffect(() => {
+    fetchDashboardStats();
+    const interval = setInterval(fetchDashboardStats, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  function formatCompactCurrency(value: number) {
+    if (value >= 1_000_000_000_000)
+      return `$${(value / 1_000_000_000_000).toFixed(3)}T`;
+    if (value >= 1_000_000_000)
+      return `$${(value / 1_000_000_000).toFixed(3)}B`;
+    if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(3)}M`;
+    if (value >= 1_000) return `$${(value / 1_000).toFixed(3)}K`;
+    return `$${value.toFixed(3)}`;
+  }
 
   const tabs = [
     { id: "prices", label: "Market Data", icon: TrendingUp },
@@ -107,9 +128,22 @@ export function TradingDashboard() {
 
               {user && (
                 <div className="flex items-center space-x-4">
+                  {user.role === "admin" && (
+                    <Crown className="w-5 h-5 text-yellow-400" />
+                  )}
                   <span className="text-gray-300">
                     Welcome, <strong>{user.username}</strong>
                   </span>
+                  {user.role === "admin" && (
+                    <button
+                      onClick={() => (window.location.href = "/admin/settings")}
+                      className="flex items-center bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-lg text-sm text-gray-200 transition"
+                    >
+                      <Settings className="w-4 h-4 mr-1" />
+                      Settings
+                    </button>
+                  )}
+
                   <button
                     onClick={async () => {
                       await fetch("/api/auth/logout", { method: "POST" });
@@ -138,7 +172,7 @@ export function TradingDashboard() {
                     Total Volume
                   </p>
                   <p className="text-2xl font-semibold text-white">
-                    ${stats.totalVolume.toLocaleString()}
+                    {formatCompactCurrency(stats.totalVolume)}
                   </p>
                 </div>
               </div>

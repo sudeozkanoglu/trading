@@ -6,6 +6,7 @@ export type JwtUserPayload = {
   sub: string;           // user id
   username: string;
   email: string;
+  role: "user" | "admin";
 };
 
 export async function signAuthToken(payload: JwtUserPayload, expires = process.env.JWT_EXPIRES || '7d') {

@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
         id: payload.sub,
         username: payload.username,
         email: payload.email,
+        role: payload.role,
       },
     });
   } catch {

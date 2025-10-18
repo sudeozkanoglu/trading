@@ -46,6 +46,7 @@ async function initializeDatabase() {
           created_at DateTime64(3),
           updated_at DateTime64(3),
           status Enum8('active' = 1, 'inactive' = 0),
+          user_role Enum8('user' = 1, 'admin' = 2) DEFAULT 'user',
           country Nullable(String),
           balance Float64
         )
